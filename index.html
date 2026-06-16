@@ -1,0 +1,966 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cinema Prive - Ariane</title>
+  <style>
+    :root {
+      --ink: #fff8ec;
+      --muted: rgba(255,248,236,.72);
+      --gold: #f4c46a;
+      --rose: #ff8aa3;
+      --wine: #311018;
+      --night: #09080d;
+      --blue: #7bc7ff;
+      --green: #95e2b4;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--night);
+      overflow-x: hidden;
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 20% 10%, rgba(244,196,106,.18), transparent 32%),
+        radial-gradient(circle at 80% 20%, rgba(123,199,255,.14), transparent 28%),
+        linear-gradient(120deg, rgba(49,16,24,.88), rgba(9,8,13,.96) 56%, rgba(11,23,28,.92));
+      z-index: -3;
+    }
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+      background-size: 44px 44px;
+      mask-image: linear-gradient(to bottom, rgba(0,0,0,.55), transparent 72%);
+      z-index: -2;
+    }
+    button, a { font: inherit; }
+    .grain {
+      position: fixed;
+      inset: 0;
+      opacity: .12;
+      pointer-events: none;
+      mix-blend-mode: soft-light;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.7'/%3E%3C/svg%3E");
+      z-index: 20;
+    }
+    .aurora {
+      position: fixed;
+      inset: -18%;
+      pointer-events: none;
+      z-index: -1;
+      background:
+        conic-gradient(from 90deg at 18% 22%, transparent, rgba(244,196,106,.2), transparent 24%),
+        conic-gradient(from 220deg at 78% 18%, transparent, rgba(255,138,163,.18), transparent 26%),
+        conic-gradient(from 20deg at 50% 92%, transparent, rgba(123,199,255,.16), transparent 30%);
+      filter: blur(34px) saturate(1.25);
+      animation: auroraMove 16s ease-in-out infinite alternate;
+      opacity: .88;
+    }
+    @keyframes auroraMove {
+      from { transform: translate3d(-3%, -2%, 0) rotate(-4deg) scale(1.02); }
+      to { transform: translate3d(3%, 2%, 0) rotate(5deg) scale(1.08); }
+    }
+    .cinema-bars {
+      position: fixed;
+      inset: 0;
+      z-index: 11;
+      pointer-events: none;
+    }
+    .cinema-bars::before,
+    .cinema-bars::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: clamp(18px, 4.8vh, 46px);
+      background: linear-gradient(#030205, rgba(3,2,5,.92));
+      box-shadow: 0 0 34px rgba(0,0,0,.55);
+    }
+    .cinema-bars::before { top: 0; }
+    .cinema-bars::after { bottom: 0; }
+    .spotlight {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 10;
+      background: radial-gradient(circle at var(--mx, 50%) var(--my, 40%), rgba(255,235,180,.17), transparent 18%, rgba(0,0,0,.08) 52%, rgba(0,0,0,.28));
+      mix-blend-mode: screen;
+      opacity: .62;
+      transition: opacity .5s ease;
+    }
+    .starfield {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 9;
+      overflow: hidden;
+    }
+    .star {
+      position: absolute;
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      background: rgba(255,235,180,.9);
+      box-shadow: 0 0 18px rgba(244,196,106,.8);
+      animation: starFall var(--dur) linear infinite;
+      animation-delay: var(--delay);
+      opacity: .85;
+    }
+    @keyframes starFall {
+      from { transform: translate3d(0, -12vh, 0) scale(.8); opacity: 0; }
+      12% { opacity: .9; }
+      to { transform: translate3d(var(--drift), 112vh, 0) scale(1.2); opacity: 0; }
+    }
+    .curtain {
+      position: fixed;
+      inset: 0;
+      z-index: 30;
+      display: grid;
+      place-items: center;
+      background: #070609;
+      transition: transform 1.25s cubic-bezier(.76,0,.24,1), opacity 1s ease;
+      overflow: hidden;
+    }
+    .curtain.open { transform: translateY(-105%); opacity: .2; }
+    .curtain::before, .curtain::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(90deg, #250810 0 34px, #3d101c 35px 60px, #19060b 61px 86px);
+      filter: saturate(1.2);
+      transform-origin: top;
+      animation: velvet 4s ease-in-out infinite alternate;
+    }
+    .curtain::after { opacity: .48; transform: scaleX(-1); }
+    @keyframes velvet { from { transform: skewX(-2deg) scale(1.02); } to { transform: skewX(2deg) scale(1.06); } }
+    .ticket {
+      position: relative;
+      z-index: 1;
+      width: min(560px, calc(100vw - 36px));
+      padding: 26px;
+      border: 1px solid rgba(244,196,106,.45);
+      background: rgba(10,8,12,.74);
+      backdrop-filter: blur(18px);
+      box-shadow: 0 22px 90px rgba(0,0,0,.55);
+      text-align: center;
+    }
+    .ticket img {
+      width: 100%;
+      max-height: 430px;
+      object-fit: cover;
+      border: 1px solid rgba(255,255,255,.18);
+      display: block;
+      filter: saturate(1.08) contrast(1.04);
+    }
+    .eyebrow {
+      margin: 0 0 10px;
+      color: var(--gold);
+      text-transform: uppercase;
+      letter-spacing: .18em;
+      font-size: .73rem;
+      font-weight: 800;
+    }
+    h1, h2, h3, p { margin-top: 0; }
+    .ticket h1 {
+      margin: 16px 0 8px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(2.35rem, 8vw, 4.9rem);
+      line-height: .88;
+      font-weight: 500;
+    }
+    .ticket p { color: var(--muted); line-height: 1.65; margin-bottom: 22px; }
+    .enter {
+      cursor: pointer;
+      border: 0;
+      color: #18080d;
+      background: linear-gradient(135deg, #ffe7aa, #f4c46a 52%, #ff8aa3);
+      padding: 15px 22px;
+      min-height: 52px;
+      font-weight: 900;
+      box-shadow: 0 18px 50px rgba(244,196,106,.25);
+      position: relative;
+      overflow: hidden;
+      transition: transform .25s ease, box-shadow .25s ease;
+    }
+    .enter::after {
+      content: "";
+      position: absolute;
+      inset: -40% -80%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.7), transparent);
+      transform: translateX(-55%) rotate(16deg);
+      animation: buttonShine 2.6s ease-in-out infinite;
+    }
+    .enter:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 22px 70px rgba(244,196,106,.34); }
+    @keyframes buttonShine { 55%, 100% { transform: translateX(85%) rotate(16deg); } }
+    main { position: relative; }
+    .scene {
+      min-height: 100vh;
+      display: grid;
+      align-items: center;
+      padding: 72px clamp(18px, 5vw, 76px);
+      position: relative;
+      overflow: hidden;
+    }
+    .hero {
+      min-height: 96vh;
+      grid-template-columns: minmax(0, 1fr) minmax(280px, 500px);
+      gap: clamp(28px, 5vw, 70px);
+    }
+    .hero-copy { max-width: 760px; position: relative; z-index: 2; }
+    .premiere-strip {
+      display: grid;
+      grid-template-columns: repeat(3, max-content);
+      gap: 8px;
+      align-items: center;
+      margin: 0 0 20px;
+    }
+    .premiere-strip span {
+      border: 1px solid rgba(244,196,106,.32);
+      background: rgba(255,255,255,.07);
+      color: rgba(255,248,236,.82);
+      padding: 8px 10px;
+      font-size: .72rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+    }
+    .hero h1 {
+      font-family: Georgia, "Times New Roman", serif;
+      font-weight: 500;
+      font-size: clamp(3.4rem, 10vw, 8.6rem);
+      line-height: .86;
+      margin-bottom: 22px;
+    }
+    .hero h1 span { color: var(--gold); }
+    .lead {
+      font-size: clamp(1.05rem, 2vw, 1.35rem);
+      line-height: 1.7;
+      color: rgba(255,248,236,.83);
+      max-width: 640px;
+    }
+    .typed {
+      min-height: 2.2em;
+      color: #ffe7aa;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(1.25rem, 2.6vw, 2.05rem);
+      line-height: 1.35;
+      margin: 18px 0 0;
+      text-shadow: 0 0 28px rgba(244,196,106,.22);
+    }
+    .typed::after {
+      content: "";
+      display: inline-block;
+      width: 2px;
+      height: .9em;
+      margin-left: 5px;
+      background: var(--gold);
+      animation: blink .8s steps(2, start) infinite;
+      vertical-align: -2px;
+    }
+    @keyframes blink { 50% { opacity: 0; } }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 46px;
+      padding: 12px 16px;
+      border: 1px solid rgba(255,255,255,.18);
+      background: rgba(255,255,255,.07);
+      color: var(--ink);
+      text-decoration: none;
+    }
+    .poster-stack { position: relative; min-height: 620px; perspective: 1300px; }
+    .poster {
+      position: absolute;
+      inset: 0;
+      border: 1px solid rgba(255,255,255,.19);
+      background: rgba(255,255,255,.06);
+      box-shadow: 0 28px 80px rgba(0,0,0,.46);
+      overflow: hidden;
+      transform: rotate(var(--r)) translate(var(--x), var(--y));
+      animation: float 7s ease-in-out infinite;
+    }
+    .poster:nth-child(2) { inset: 42px 44px 74px -18px; animation-delay: -2s; opacity: .78; }
+    .poster:nth-child(3) { inset: 82px -18px 32px 62px; animation-delay: -4s; opacity: .68; }
+    .poster img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .poster::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,.58), transparent 55%);
+    }
+    .poster::before {
+      content: "ARIANE";
+      position: absolute;
+      left: 18px;
+      bottom: 16px;
+      z-index: 2;
+      color: rgba(255,248,236,.84);
+      font-size: .78rem;
+      font-weight: 900;
+      letter-spacing: .2em;
+      text-shadow: 0 4px 20px rgba(0,0,0,.8);
+    }
+    @keyframes float { 50% { transform: rotate(calc(var(--r) * -1)) translate(calc(var(--x) * -1), calc(var(--y) * -1 - 16px)); } }
+    .ticker {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 18px;
+      display: flex;
+      white-space: nowrap;
+      overflow: hidden;
+      border-block: 1px solid rgba(244,196,106,.22);
+      background: rgba(0,0,0,.22);
+      color: rgba(255,248,236,.62);
+      text-transform: uppercase;
+      letter-spacing: .18em;
+      font-size: .75rem;
+    }
+    .ticker span { padding: 12px 24px; animation: roll 22s linear infinite; }
+    @keyframes roll { to { transform: translateX(-100%); } }
+    .love-reel {
+      min-height: 64vh;
+      padding-block: 84px;
+    }
+    .reel-wrap {
+      width: min(1180px, 100%);
+      margin: 0 auto;
+    }
+    .reel-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 18px;
+      margin-bottom: 22px;
+    }
+    .reel-title h2 {
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(2.3rem, 5vw, 5.4rem);
+      line-height: .92;
+      font-weight: 500;
+      margin: 0;
+    }
+    .reel-title p {
+      max-width: 430px;
+      color: rgba(255,248,236,.72);
+      line-height: 1.7;
+      margin: 0;
+    }
+    .filmstrip {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(190px, 1fr));
+      gap: 12px;
+      padding: 14px;
+      border: 1px solid rgba(255,255,255,.15);
+      background:
+        linear-gradient(90deg, rgba(0,0,0,.58), rgba(255,255,255,.04), rgba(0,0,0,.58)),
+        rgba(255,255,255,.045);
+      box-shadow: 0 28px 90px rgba(0,0,0,.35);
+    }
+    .film-card {
+      min-height: 260px;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(244,196,106,.18);
+      background: rgba(255,255,255,.05);
+      isolation: isolate;
+    }
+    .film-card img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scale(1.04);
+      transition: transform .8s ease, filter .8s ease;
+      filter: saturate(1.04) contrast(1.03);
+    }
+    .film-card:hover img { transform: scale(1.13); filter: saturate(1.18) contrast(1.08); }
+    .film-card::before,
+    .film-card::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 18px;
+      z-index: 2;
+      background: repeating-linear-gradient(90deg, #050407 0 12px, rgba(255,255,255,.18) 13px 20px, #050407 21px 32px);
+    }
+    .film-card::before { top: 0; }
+    .film-card::after { bottom: 0; }
+    .film-card span {
+      position: absolute;
+      left: 14px;
+      right: 14px;
+      bottom: 32px;
+      z-index: 3;
+      color: #fff8ec;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 1.35rem;
+      line-height: 1.2;
+      text-shadow: 0 3px 20px rgba(0,0,0,.9);
+    }
+    .chapter { grid-template-columns: .8fr 1.2fr; gap: clamp(28px, 6vw, 82px); }
+    .chapter:nth-of-type(even) { grid-template-columns: 1.15fr .85fr; }
+    .frame {
+      position: relative;
+      min-height: 460px;
+      border: 1px solid rgba(244,196,106,.28);
+      overflow: hidden;
+      box-shadow: 0 26px 72px rgba(0,0,0,.37);
+    }
+    .frame img { width: 100%; height: 100%; min-height: 460px; object-fit: cover; display: block; }
+    .frame::before {
+      content: "";
+      position: absolute;
+      inset: 16px;
+      border: 1px solid rgba(255,255,255,.34);
+      z-index: 1;
+      pointer-events: none;
+    }
+    .frame::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(110deg, transparent 20%, rgba(255,255,255,.18) 42%, transparent 56%);
+      transform: translateX(-130%);
+      animation: frameGleam 5.8s ease-in-out infinite;
+      z-index: 2;
+      pointer-events: none;
+    }
+    @keyframes frameGleam {
+      45%, 100% { transform: translateX(130%); }
+    }
+    .story { max-width: 720px; }
+    .story h2 {
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(2.4rem, 5vw, 5.3rem);
+      line-height: .92;
+      font-weight: 500;
+      margin-bottom: 22px;
+    }
+    .story p {
+      color: rgba(255,248,236,.79);
+      font-size: clamp(1.02rem, 1.6vw, 1.24rem);
+      line-height: 1.85;
+      margin-bottom: 18px;
+    }
+    .quote {
+      margin-top: 24px;
+      padding-left: 18px;
+      border-left: 3px solid var(--gold);
+      color: #ffe7aa !important;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(1.25rem, 2.5vw, 2rem) !important;
+      line-height: 1.45 !important;
+    }
+    .constellation {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      width: min(1100px, 100%);
+      margin: 0 auto;
+    }
+    .memory {
+      min-height: 320px;
+      padding: 18px;
+      border: 1px solid rgba(255,255,255,.16);
+      background: rgba(255,255,255,.055);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      overflow: hidden;
+      position: relative;
+    }
+    .memory img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .76; transition: transform .7s ease; }
+    .memory:hover img { transform: scale(1.07); }
+    .memory strong, .memory span { position: relative; z-index: 1; text-shadow: 0 2px 24px rgba(0,0,0,.8); }
+    .memory strong { font-family: Georgia, "Times New Roman", serif; font-size: 1.7rem; font-weight: 500; }
+    .memory span { color: rgba(255,248,236,.78); line-height: 1.45; }
+    .finale { text-align: center; min-height: 100vh; }
+    .finale-inner { width: min(900px, 100%); margin: 0 auto; }
+    .finale h2 {
+      font-family: Georgia, "Times New Roman", serif;
+      font-weight: 500;
+      font-size: clamp(3.1rem, 8vw, 7.8rem);
+      line-height: .9;
+      margin-bottom: 24px;
+    }
+    .finale p {
+      color: rgba(255,248,236,.82);
+      font-size: clamp(1.05rem, 2vw, 1.35rem);
+      line-height: 1.85;
+      max-width: 760px;
+      margin-inline: auto;
+    }
+    .signature {
+      margin-top: 38px;
+      color: var(--gold);
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(1.8rem, 4vw, 3.4rem);
+    }
+    .reveal { opacity: 0; transform: translateY(36px); transition: opacity .85s ease, transform .85s ease; }
+    .reveal.in { opacity: 1; transform: translateY(0); }
+    .reveal.pop { transform: translateY(36px) scale(.96); }
+    .reveal.pop.in { transform: translateY(0) scale(1); }
+    .spark {
+      position: fixed;
+      width: 5px;
+      height: 5px;
+      pointer-events: none;
+      border-radius: 50%;
+      background: var(--gold);
+      box-shadow: 0 0 24px var(--gold);
+      animation: spark 1.3s ease forwards;
+      z-index: 25;
+    }
+    @keyframes spark { to { transform: translate(var(--sx), var(--sy)) scale(0); opacity: 0; } }
+    .sound {
+      position: fixed;
+      right: 14px;
+      bottom: 14px;
+      z-index: 12;
+      border: 1px solid rgba(255,255,255,.16);
+      background: rgba(0,0,0,.38);
+      color: var(--ink);
+      min-width: 44px;
+      min-height: 44px;
+      cursor: pointer;
+    }
+    .sound.active { color: #18080d; background: linear-gradient(135deg, #ffe7aa, #f4c46a 52%, #ff8aa3); box-shadow: 0 0 34px rgba(244,196,106,.38); }
+    @media (max-width: 860px) {
+      .scene, .hero, .chapter, .chapter:nth-of-type(even) { grid-template-columns: 1fr; }
+      .hero { padding-top: 54px; }
+      .poster-stack { min-height: 520px; order: -1; }
+      .chapter:nth-of-type(even) .frame { order: -1; }
+      .constellation { grid-template-columns: 1fr 1fr; }
+      .frame, .frame img { min-height: 380px; }
+      .premiere-strip { grid-template-columns: 1fr; align-items: stretch; }
+      .premiere-strip span { width: 100%; }
+      .reel-title { display: block; }
+      .reel-title p { margin-top: 12px; }
+      .filmstrip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    .curtain-photo-wrap {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,.22);
+      box-shadow: 0 24px 90px rgba(0,0,0,.56), 0 0 46px rgba(244,196,106,.2);
+      isolation: isolate;
+    }
+    .curtain-photo-wrap::before {
+      content: "";
+      position: absolute;
+      inset: -40% -80%;
+      z-index: 2;
+      background: linear-gradient(115deg, transparent 35%, rgba(255,255,255,.6), transparent 62%);
+      animation: coverSweep 3.8s ease-in-out infinite;
+      pointer-events: none;
+    }
+    .curtain-photo-wrap::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      background: radial-gradient(circle at 50% 24%, transparent 35%, rgba(7,6,9,.1) 62%, rgba(7,6,9,.48));
+      pointer-events: none;
+    }
+    @keyframes coverSweep { 0%, 38% { transform: translateX(-60%) rotate(12deg); } 70%, 100% { transform: translateX(82%) rotate(12deg); } }
+    .ticket .soft-line {
+      margin: 8px auto 18px;
+      max-width: 440px;
+      color: rgba(255,248,236,.84);
+      font-size: .98rem;
+    }
+    .ticket .dedication {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 14px;
+      color: var(--gold);
+      font-size: .76rem;
+      font-weight: 900;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+    }
+    .floating-petal {
+      position: fixed;
+      top: -24px;
+      left: var(--x);
+      z-index: 8;
+      width: var(--s);
+      height: calc(var(--s) * 1.35);
+      border-radius: 70% 18% 70% 18%;
+      background: linear-gradient(145deg, rgba(255,221,142,.94), rgba(255,138,163,.74));
+      box-shadow: 0 0 18px rgba(255,138,163,.22);
+      pointer-events: none;
+      opacity: .72;
+      transform: rotate(var(--r));
+      animation: petalFall var(--d) linear forwards;
+    }
+    @keyframes petalFall {
+      to { transform: translate3d(var(--dx), 112vh, 0) rotate(calc(var(--r) + 420deg)); opacity: 0; }
+    }
+    .spot-card {
+      position: absolute;
+      right: clamp(18px, 5vw, 70px);
+      bottom: clamp(72px, 9vh, 120px);
+      z-index: 3;
+      max-width: 340px;
+      padding: 18px 20px;
+      border-left: 3px solid var(--gold);
+      background: linear-gradient(90deg, rgba(7,6,9,.78), rgba(7,6,9,.24));
+      color: rgba(255,248,236,.9);
+      box-shadow: 0 24px 80px rgba(0,0,0,.22);
+      backdrop-filter: blur(12px);
+      animation: noteFloat 5s ease-in-out infinite alternate;
+    }
+    .spot-card strong { display: block; color: var(--gold); margin-bottom: 6px; }
+    @keyframes noteFloat { from { transform: translateY(0); } to { transform: translateY(-12px); } }
+    @media (max-width: 560px) {
+      .scene { min-height: auto; padding: 58px 16px; }
+      .hero { min-height: 100vh; }
+      .poster-stack { min-height: 420px; }
+      .poster:nth-child(2), .poster:nth-child(3) { inset: 36px 22px 42px 12px; }
+      .constellation { grid-template-columns: 1fr; }
+      .filmstrip { grid-template-columns: 1fr; padding: 10px; }
+      .film-card { min-height: 330px; }
+      .memory { min-height: 380px; }
+      .ticket { padding: 16px; }
+      .ticket img { max-height: 360px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="aurora"></div>
+  <div class="starfield" id="starfield"></div>
+  <div class="spotlight" id="spotlight"></div>
+  <div class="cinema-bars"></div>
+  <div class="grain"></div>
+  <div class="curtain" id="curtain">
+    <section class="ticket">
+      <p class="eyebrow">Projection privee - une seule invitee</p>
+      <div class="curtain-photo-wrap"><img id="cover" alt="Ariane, affiche du film" /></div>
+      <h1>Ariane</h1>
+      <p class="soft-line">Ce soir, la salle est vide pour tout le monde... sauf pour toi. Clique, ma queen, et entre dans une histoire ecrite pour faire sourire ton coeur.</p><div class="dedication">Avant-premiere privee</div>
+      <button class="enter" id="enter">Entrer dans le voyage</button>
+    </section>
+  </div>
+
+  <button class="sound" id="sound" title="Ambiance">♪</button>
+
+  <main>
+    <section class="scene hero" id="top">
+      <div class="hero-copy reveal">
+        <div class="premiere-strip" aria-label="Details de projection">
+          <span>Une invitee</span>
+          <span>Un film</span>
+          <span>Une queen</span>
+        </div>
+        <p class="eyebrow">Cinema Prive presente</p>
+        <h1>Ariane, la fille qui rend le monde <span>plus beau</span>.</h1>
+        <p class="lead">Ariane, parfois une photo ne capture pas seulement un visage. Elle garde une lumiere, une facon d'exister, cette douceur rare qui entre doucement et reste longtemps apres.</p>
+        <p class="typed" id="typed"></p>
+        <div class="hero-actions">
+          <a class="pill" href="#scene1">Voir la scene 1</a>
+          <a class="pill" href="#finale">Lire le mot final</a>
+        </div>
+      </div>
+      <div class="poster-stack reveal" aria-label="Affiches du film">
+        <div class="poster" style="--r:-4deg;--x:0px;--y:0px"><img class="photo" alt="Portrait Ariane"></div>
+        <div class="poster" style="--r:5deg;--x:12px;--y:8px"><img class="photo" alt="Moment Ariane"></div>
+        <div class="poster" style="--r:-8deg;--x:-10px;--y:12px"><img class="photo" alt="Souvenir Ariane"></div>
+      </div>
+      <div class="ticker"><span>Ariane - ma queen - ma wobe version amelioree - sourire dangereux - lumiere rare - cinema prive -</span><span>Ariane - ma queen - ma wobe version amelioree - sourire dangereux - lumiere rare - cinema prive -</span></div><aside class="spot-card"><strong>Petit aveu</strong>Il y a des beautes qu'on regarde. Et puis il y a toi: on regarde, on sourit, puis on garde le souvenir.</aside>
+    </section>
+
+    <section class="scene love-reel">
+      <div class="reel-wrap reveal pop">
+        <div class="reel-title">
+          <h2>Les plans ou tout devient evident.</h2>
+          <p>Chaque image a son petit secret: un regard, une elegance, un calme, une lumiere. Ariane, meme quand la photo est simple, l'effet ne l'est jamais. Tu as ce truc rare: la beaute qui ne force rien, mais qui gagne quand meme.</p>
+        </div>
+        <div class="filmstrip">
+          <div class="film-card"><img class="photo" alt="Ariane"><span>Plan 01 - le sourire qui fait pause.</span></div>
+          <div class="film-card"><img class="photo" alt="Ariane"><span>Plan 02 - la classe sans effort.</span></div>
+          <div class="film-card"><img class="photo" alt="Ariane"><span>Plan 03 - ma queen dans son calme.</span></div>
+          <div class="film-card"><img class="photo" alt="Ariane"><span>Plan 04 - le waouh discret.</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="scene chapter" id="scene1">
+      <div class="frame reveal"><img class="photo" alt="Ariane"></div>
+      <article class="story reveal">
+        <p class="eyebrow">Scene 1 - La fleur</p>
+        <h2>J'ai vu une belle fleur aujourd'hui.</h2>
+        <p>Pendant quelques secondes, je me suis arrete pour l'admirer. Elle avait ce petit quelque chose qui force le silence, le genre de beaute qui fait ralentir les pas et qui donne envie de mieux regarder la vie.</p>
+        <p>Et puis je me suis rappele que j'avais deja vu plus beau... dans tes photos. C'est dji dji hein, mais c'est sorti du coeur.</p>
+        <p class="quote">Il y a des fleurs qui decorent une journee. Et puis il y a toi, Ariane, qui peux decorer une pensee entiere.</p>
+      </article>
+    </section>
+
+    <section class="scene chapter" id="scene2">
+      <article class="story reveal">
+        <p class="eyebrow">Scene 2 - Ma wobe version amelioree</p>
+        <h2>Tu as une presence qu'on ne force pas.</h2>
+        <p>Ce n'est pas seulement que tu es belle. C'est plus elegant que ca. C'est dans ton regard, dans ta maniere d'etre la sans trop parler, dans cette impression que le cadre devient meilleur quand tu es dedans, comme si la lumiere avait choisi son cote.</p>
+        <p>Ma queen, il y a des personnes qu'on remarque. Et il y a celles qu'on retient. Toi, tu fais les deux avec une facilite presque injuste. Ma wobe version amelioree, tu as ce calme qui fait du bruit dans la tete.</p>
+        <p class="quote">Tu ne poses pas seulement sur une photo. Tu lui donnes une raison d'exister.</p>
+      </article>
+      <div class="frame reveal"><img class="photo" alt="Ariane"></div>
+    </section>
+
+    <section class="scene">
+      <div class="constellation reveal" id="memories">
+        <div class="memory"><img class="photo" alt="Ariane"><strong>Regard</strong><span>Le genre de regard qui fait oublier ce qu'on voulait dire.</span></div>
+        <div class="memory"><img class="photo" alt="Ariane"><strong>Lumiere</strong><span>Meme sans projecteur, tu prends naturellement la scene.</span></div>
+        <div class="memory"><img class="photo" alt="Ariane"><strong>Classe</strong><span>Simple, douce, mais avec un effet waouh tres dangereux.</span></div>
+        <div class="memory"><img class="photo" alt="Ariane"><strong>Queen</strong><span>Pas parce qu'on le dit. Parce que ca se voit.</span></div>
+      </div>
+    </section>
+
+    <section class="scene chapter" id="scene3">
+      <div class="frame reveal"><img class="photo" alt="Ariane"></div>
+      <article class="story reveal">
+        <p class="eyebrow">Scene 3 - Ce que les photos ne disent pas</p>
+        <h2>Une image montre ton visage. Mais elle cache l'effet.</h2>
+        <p>L'effet, c'est ce petit moment ou quelqu'un tombe sur ta photo et reste une seconde de plus que prevu. C'est le sourire qui arrive sans invitation. C'est le calme dans la poitrine, puis le waouh qui arrive doucement.</p>
+        <p>Alors oui, j'aurais pu envoyer un message simple. Mais une fille comme Ariane merite une entree de cinema, des lumieres qui s'allument, et une histoire qui avance doucement vers elle, avec respect, douceur et beaucoup d'admiration.</p>
+        <p class="quote">Si la beaute etait un film, toi tu serais la scene qu'on remet en boucle.</p>
+      </article>
+    </section>
+
+    <section class="scene finale" id="finale">
+      <div class="finale-inner reveal">
+        <p class="eyebrow">Generique de coeur</p>
+        <h2>Ariane, ce lien etait juste pour toi.</h2>
+        <p>Pas pour faire trop. Pas pour jouer au grand romantique. Juste pour te dire, avec un peu de cinema et beaucoup de sincerite, que tu as quelque chose de rare. Quelque chose qui attire sans crier. Quelque chose qui donne envie de mieux regarder le monde, juste parce que tu y es.</p>
+        <p>Alors garde ca comme une petite projection privee: un instant ou quelqu'un a pris le temps de transformer quelques photos en voyage, parce que ton sourire le meritait, parce que ta presence le meritait, et parce que ma queen Ariane ne meritait pas un message ordinaire.</p>
+        <div class="signature">Pour ma queen Ariane</div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const backgroundMusicSrc = "assets/background-music.mp3";
+    const photos = [
+      "https://image.noelshack.com/fichiers/2026/25/2/1781619473-img-20260612-wa0199.jpg",
+      "https://image.noelshack.com/fichiers/2026/25/2/1781619503-img-20260612-wa0198.jpg",
+      "https://image.noelshack.com/fichiers/2026/25/2/1781619518-img-20260612-wa0203.jpg",
+      "https://image.noelshack.com/fichiers/2026/25/2/1781619533-img-20260612-wa0205.jpg"
+    ];
+    const photoEls = [...document.querySelectorAll('.photo')];
+    document.getElementById('cover').src = photos[0];
+    photoEls.forEach((img, index) => { img.src = photos[index % photos.length]; });
+
+    const starfield = document.getElementById('starfield');
+    for (let i = 0; i < 88; i++) {
+      const star = document.createElement('i');
+      star.className = 'star';
+      star.style.left = Math.random() * 100 + 'vw';
+      star.style.setProperty('--dur', (7 + Math.random() * 9) + 's');
+      star.style.setProperty('--delay', (-Math.random() * 16) + 's');
+      star.style.setProperty('--drift', (Math.random() * 180 - 90) + 'px');
+      starfield.appendChild(star);
+    }
+
+    const typedEl = document.getElementById('typed');
+    const typedLines = [
+      "Ce n'est pas une page. C'est une entree speciale pour toi.",
+      "Ariane, tu as ce genre de beaute qui calme le bruit autour.",
+      "Ma queen, meme une simple photo de toi peut changer l'ambiance.",
+      "Ma wobe version amelioree, ton sourire a son propre scenario.",
+      "Si le monde etait un film, ton sourire serait la lumiere principale."
+    ];
+    let lineIndex = 0;
+    let charIndex = 0;
+    let deleting = false;
+    function typeLoop() {
+      const line = typedLines[lineIndex];
+      typedEl.textContent = line.slice(0, charIndex);
+      if (!deleting && charIndex < line.length) charIndex++;
+      else if (!deleting) { deleting = true; setTimeout(typeLoop, 1450); return; }
+      else if (charIndex > 0) charIndex--;
+      else { deleting = false; lineIndex = (lineIndex + 1) % typedLines.length; }
+      setTimeout(typeLoop, deleting ? 28 : 54);
+    }
+    typeLoop();
+
+
+    function launchPetals() {
+      for (let i = 0; i < 36; i++) {
+        setTimeout(() => {
+          const petal = document.createElement('i');
+          petal.className = 'floating-petal';
+          petal.style.setProperty('--x', Math.random() * 100 + 'vw');
+          petal.style.setProperty('--s', (8 + Math.random() * 15) + 'px');
+          petal.style.setProperty('--d', (5 + Math.random() * 6) + 's');
+          petal.style.setProperty('--dx', (Math.random() * 220 - 110) + 'px');
+          petal.style.setProperty('--r', (Math.random() * 120 - 60) + 'deg');
+          document.body.appendChild(petal);
+          setTimeout(() => petal.remove(), 11200);
+        }, i * 130);
+      }
+    }
+    const curtain = document.getElementById('curtain');
+    document.getElementById('enter').addEventListener('click', () => {
+      curtain.classList.add('open');
+      setTimeout(() => document.getElementById('top').scrollIntoView({ behavior: 'smooth' }), 320);
+      burst(innerWidth / 2, innerHeight / 2, 70);
+      premiereFlash();
+      playTone();
+      startBackgroundMusic();
+    });
+
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) entry.target.classList.add('in');
+      });
+    }, { threshold: .18 });
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+    window.addEventListener('pointermove', event => {
+      document.documentElement.style.setProperty('--mx', event.clientX + 'px');
+      document.documentElement.style.setProperty('--my', event.clientY + 'px');
+      if (Math.random() > .76) burst(event.clientX, event.clientY, 1);
+    });
+
+    window.addEventListener('scroll', () => {
+      const depth = Math.min(1, scrollY / (document.documentElement.scrollHeight - innerHeight));
+      document.documentElement.style.setProperty('--mx', (50 + Math.sin(depth * Math.PI * 2) * 22) + '%');
+      document.documentElement.style.setProperty('--my', (35 + depth * 30) + '%');
+    }, { passive: true });
+
+    function burst(x, y, amount = 10) {
+      for (let i = 0; i < amount; i++) {
+        const s = document.createElement('i');
+        s.className = 'spark';
+        s.style.left = x + 'px';
+        s.style.top = y + 'px';
+        s.style.setProperty('--sx', (Math.random() * 220 - 110) + 'px');
+        s.style.setProperty('--sy', (Math.random() * 220 - 110) + 'px');
+        document.body.appendChild(s);
+        setTimeout(() => s.remove(), 1400);
+      }
+    }
+
+    function premiereFlash() {
+      const flash = document.createElement('div');
+      flash.style.cssText = 'position:fixed;inset:0;background:radial-gradient(circle,#fff7d1,rgba(244,196,106,.35),transparent 62%);z-index:28;pointer-events:none;opacity:.9;animation:flashOut 900ms ease forwards;';
+      document.body.appendChild(flash);
+      const style = document.createElement('style');
+      style.textContent = '@keyframes flashOut{to{opacity:0;transform:scale(1.35);}}';
+      document.head.appendChild(style);
+      setTimeout(() => { flash.remove(); style.remove(); }, 950);
+    }
+
+        let audioCtx;
+    let bgAudio;
+    let bgSource;
+    let bgGain;
+    let bgPanner;
+    let bgStarted = false;
+    let panAnimation;
+
+    function startBackgroundMusic() {
+      try {
+        audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        if (!bgAudio) {
+          bgAudio = new Audio(backgroundMusicSrc);
+          bgAudio.loop = true;
+          bgAudio.preload = 'auto';
+          bgAudio.crossOrigin = 'anonymous';
+          bgSource = audioCtx.createMediaElementSource(bgAudio);
+          bgGain = audioCtx.createGain();
+          bgGain.gain.value = 0;
+          bgPanner = audioCtx.createStereoPanner ? audioCtx.createStereoPanner() : null;
+          if (bgPanner) {
+            bgSource.connect(bgGain).connect(bgPanner).connect(audioCtx.destination);
+          } else {
+            bgSource.connect(bgGain).connect(audioCtx.destination);
+          }
+        }
+        const playPromise = bgAudio.play();
+        if (playPromise && typeof playPromise.catch === 'function') {
+          playPromise.catch(() => {
+            bgStarted = false;
+            document.getElementById('sound').classList.remove('active');
+          });
+        }
+        bgStarted = true;
+        document.getElementById('sound').classList.add('active');
+        bgGain.gain.cancelScheduledValues(audioCtx.currentTime);
+        bgGain.gain.setValueAtTime(bgGain.gain.value, audioCtx.currentTime);
+        bgGain.gain.linearRampToValueAtTime(0.16, audioCtx.currentTime + 3.2);
+        spatialDrift();
+      } catch (e) {}
+    }
+
+    function toggleBackgroundMusic() {
+      if (!bgStarted || !bgAudio || bgAudio.paused) {
+        startBackgroundMusic();
+        return;
+      }
+      bgStarted = false;
+      document.getElementById('sound').classList.remove('active');
+      if (bgGain && audioCtx) {
+        bgGain.gain.cancelScheduledValues(audioCtx.currentTime);
+        bgGain.gain.setValueAtTime(bgGain.gain.value, audioCtx.currentTime);
+        bgGain.gain.linearRampToValueAtTime(0.001, audioCtx.currentTime + .8);
+      }
+      setTimeout(() => { if (bgAudio && !bgStarted) bgAudio.pause(); }, 850);
+    }
+
+    function spatialDrift() {
+      if (!bgPanner || !audioCtx || panAnimation) return;
+      const startedAt = audioCtx.currentTime;
+      const drift = () => {
+        if (bgStarted && bgPanner) bgPanner.pan.value = Math.sin((audioCtx.currentTime - startedAt) * .42) * .55;
+        panAnimation = requestAnimationFrame(drift);
+      };
+      drift();
+    }
+
+    function playTone() {
+      try {
+        audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+        const notes = [261.63, 329.63, 392, 523.25];
+        notes.forEach((freq, i) => {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.value = freq;
+          gain.gain.setValueAtTime(0, audioCtx.currentTime + i * .13);
+          gain.gain.linearRampToValueAtTime(.055, audioCtx.currentTime + i * .13 + .03);
+          gain.gain.exponentialRampToValueAtTime(.001, audioCtx.currentTime + i * .13 + .55);
+          osc.connect(gain).connect(audioCtx.destination);
+          osc.start(audioCtx.currentTime + i * .13);
+          osc.stop(audioCtx.currentTime + i * .13 + .6);
+        });
+      } catch (e) {}
+    }
+    document.getElementById('sound').addEventListener('click', toggleBackgroundMusic);
+  </script>
+</body>
+</html>
